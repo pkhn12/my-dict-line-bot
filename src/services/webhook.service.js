@@ -1,15 +1,23 @@
-import { isEnglish } from '../utils'
+import FirebaseService from './firebase.service';
 
-const hookAction = async (body) => {
-  const events = body.events;
-  events.map((event) => {
-    if (event.type === 'message') {
-      console.log(event.message);
-      console.log(isEnglish(event.message));
-    }
-  });
-};
+export default class WebhookService  {
+  constructor() {
+    this.firebaseService = new FirebaseService();
+  }
 
-module.exports = {
-  hookAction
-};
+  async hookAction(body) {
+    const events = body.events;
+    events.map(async (event) => {
+      if (event.type === 'message') {
+        const { replyToken, message } = event;
+        const { text } = message;
+        const answer = await this.firebaseService.findKeyword(text);
+        if (answer) {
+          console.log('reply message!!!');
+        } else {
+          console.log('reply question');
+        }
+      }
+    });
+  };
+}
