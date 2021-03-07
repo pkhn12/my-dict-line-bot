@@ -119,7 +119,7 @@ export default class WebhookService {
     await this.sendMesssage(replyToken, message, 'comfirm add answer')
   }
 
-  sendQuestion(replyToken, keyword) {
+  async sendQuestion(replyToken, keyword) {
     const message = {
       type: 'text',
       text: `ไม่เจอคำว่า '${keyword}' ในระบบ`,
@@ -139,7 +139,7 @@ export default class WebhookService {
     await this.sendMesssage(replyToken, message, 'send question');
   }
 
-  answerKeyword(replyToken, keyword, answer) {
+  async answerKeyword(replyToken, keyword, answer) {
     const message = {
       type: 'text',
       text: `${keyword}: ${answer}`,
