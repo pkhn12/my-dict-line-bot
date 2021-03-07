@@ -33,21 +33,69 @@ export default class WebhookService {
       }
 
       if (event.type === 'postback') {
-        console.log('this is postback');
-        console.log(event);
         const { type, keyword, answer } = JSON.parse(event.postback.data);
-
+        console.log(type, keyword, answer);
         if (type === 'add') {
           await this.confirmAddAnswer(replyToken, keyword, userId);
         } else if (type === 'save') {
-          this.firebaseService.removeList(userId);
+          await this.saveKeywordAnswer(replyToken, keyword, answer, userId);
+          await this.firebaseService.removeList(userId);
         } else if (type === 'unsave') {
-          this.firebaseService.removeList(userId);
+          await this.cancelKeyword(replyToken, keyword);
+          await this.firebaseService.removeList(userId);
+        } else if (type === 'remove') {
+          this.removeKeyword(replyToken, keyword, answer, userId);
         }
       }
     });
   }
 
+  async removeKeyword(replyToken, keyword, userId) {
+    const message = {
+      type: 'text',
+      text: `ลบความหมายของคำว่า ${keyword} เรียบร้อยแล้ว`
+    };
+    await this.firebaseService.removeKeywordDictionary(keyword, userId);
+    this.lineClient.replyMessage(replyToken, message).then(() => {
+      console.log('reply remove keyword success')
+    }).catch(err => {
+      const response = err.originalError.response;
+      console.log('reply fail', response.data);
+    });
+  }
+
+  async saveKeywordAnswer(replyToken, keyword, answer, userId) {
+    const message = [
+      {
+        type: 'text',
+        text: 'บันทึกความหมายเรียบร้อยแล้ว'
+      },
+      {
+        type: 'text',
+        text: `${keyword}: ${answer}`
+      }
+    ];
+    await this.firebaseService.saveDictionary(userId, keyword, answer);
+    this.lineClient.replyMessage(replyToken, message).then(() => {
+      console.log('reply save keyword success')
+    }).catch(err => {
+      const response = err.originalError.response;
+      console.log('reply fail', response.data);
+    });
+  }
+
+  async cancelKeyword(replyToken, keyword) {
+    const message = {
+      type: 'text',
+      text: `ยกเลิกการบันทึกคำ '${keyword}'`
+    }
+    this.lineClient.replyMessage(replyToken, message).then(() => {
+      console.log('reply cancel keyword success')
+    }).catch(err => {
+      const response = err.originalError.response;
+      console.log('reply fail', response.data);
+    });
+  }
 
   async confirmSaveAnswer(replyToken, keyword, answer) {
     const message = {
@@ -127,6 +175,26 @@ export default class WebhookService {
     const message = {
       type: 'text',
       text: `${keyword}: ${answer}`,
+      quickReply: {
+        items: [
+          {
+            type: 'action',
+            action: {
+              type: 'postback',
+              label: 'แก้ไข',
+              data: JSON.stringify({ type: 'add', keyword })
+            }
+          },
+          {
+            type: 'action',
+            action: {
+              type: 'postback',
+              label: 'ลบคำนี้ทิ้ง',
+              data: JSON.stringify({ type: 'remove', keyword })
+            }
+          }
+        ],
+      }
     }
     this.lineClient.replyMessage(replyToken, message).then(() => {
       console.log(`reply success keyword is '${keyword}' = '${answer}'`)

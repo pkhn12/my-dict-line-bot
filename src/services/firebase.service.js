@@ -31,4 +31,28 @@ export default class FirebaseService {
     await this.database.ref('waitList/' + userId).remove();
     console.log(`removelist ${userId}`);
   }
+
+  async saveDictionary(userId, keyword, answer) {
+    const oldVal = await this.dictionary.child(keyword).get();
+    if (oldVal.val()) {
+      let { oldOwner } = oldVal.val();
+      oldOwner = `${oldOwner}, ${userId}`;
+      await this.dictionary.child(keyword).set({
+        answer,
+        oldOwner,
+        owner: userId, 
+      });
+    } else {
+      await this.dictionary.child(keyword).set({
+        answer,
+        oldOwner: userId,
+        owner: userId,
+      });
+    }
+  }
+
+  async removeKeywordDictionary(keyword, userId) {
+    console.log(`keyword '${keyword}' is removed by ${userId}`);
+    await this.dictionary.child(keyword).remove();
+  }
 }
