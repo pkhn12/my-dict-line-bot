@@ -56,12 +56,7 @@ export default class WebhookService {
       text: `ลบความหมายของคำว่า ${keyword} เรียบร้อยแล้ว`
     };
     await this.firebaseService.removeKeywordDictionary(keyword, userId);
-    this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log('reply remove keyword success')
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    await this.sendMesssage(replyToken, message, 'remove keyword')
   }
 
   async saveKeywordAnswer(replyToken, keyword, answer, userId) {
@@ -76,12 +71,7 @@ export default class WebhookService {
       }
     ];
     await this.firebaseService.saveDictionary(userId, keyword, answer);
-    this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log('reply save keyword success')
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    await this.sendMesssage(replyToken, message, 'save keyword answer')
   }
 
   async cancelKeyword(replyToken, keyword) {
@@ -89,12 +79,7 @@ export default class WebhookService {
       type: 'text',
       text: `ยกเลิกการบันทึกคำ '${keyword}'`
     }
-    this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log('reply cancel keyword success')
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    await this.sendMesssage(replyToken, message, 'cancel keyword')
   }
 
   async confirmSaveAnswer(replyToken, keyword, answer) {
@@ -122,13 +107,7 @@ export default class WebhookService {
         ],
       }
     }
-
-    this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log('send confirm save answer');
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    await this.sendMesssage(replyToken, message, 'confirm save answer')
   }
 
   async confirmAddAnswer(replyToken, keyword, userId) {
@@ -137,16 +116,11 @@ export default class WebhookService {
       text: `พิมพ์ความหมายคำว่า '${keyword}'`,
     };
     await this.firebaseService.waitForAnswer(keyword, userId);
-    this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log('reply quick reply')
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    await this.sendMesssage(replyToken, message, 'comfirm add answer')
   }
 
-  sendQuestion(replyToken, keyword) {
-    const messages = {
+  async sendQuestion(replyToken, keyword) {
+    const message = {
       type: 'text',
       text: `ไม่เจอคำว่า '${keyword}' ในระบบ`,
       quickReply: {
@@ -161,17 +135,11 @@ export default class WebhookService {
           }
         ]
       }
-    };
-    
-    this.lineClient.replyMessage(replyToken, messages).then(() => {
-      console.log(`reply question`)
-    }).catch(err => {
-      const response = err.originalError.response;
-      console.log('reply fail', response.data);
-    });
+    };    
+    await this.sendMesssage(replyToken, message, 'send question');
   }
 
-  answerKeyword(replyToken, keyword, answer) {
+  async answerKeyword(replyToken, keyword, answer) {
     const message = {
       type: 'text',
       text: `${keyword}: ${answer}`,
@@ -196,8 +164,12 @@ export default class WebhookService {
         ],
       }
     }
+    await this.sendMesssage(replyToken, message, 'answer keyword')
+  }
+
+  async sendMesssage(replyToken, message, action) {
     this.lineClient.replyMessage(replyToken, message).then(() => {
-      console.log(`reply success keyword is '${keyword}' = '${answer}'`)
+      console.log(`reply ${action} success`);
     }).catch(err => {
       const response = err.originalError.response;
       console.log('reply fail', response.data);
