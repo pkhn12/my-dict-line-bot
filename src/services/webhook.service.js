@@ -120,7 +120,7 @@ export default class WebhookService {
   }
 
   sendQuestion(replyToken, keyword) {
-    const messages = {
+    const message = {
       type: 'text',
       text: `ไม่เจอคำว่า '${keyword}' ในระบบ`,
       quickReply: {
@@ -136,7 +136,7 @@ export default class WebhookService {
         ]
       }
     };    
-    await this.sendMesssage(replyToken, message, 'send question')
+    await this.sendMesssage(replyToken, message, 'send question');
   }
 
   answerKeyword(replyToken, keyword, answer) {
