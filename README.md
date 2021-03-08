@@ -40,3 +40,6 @@ API_ID
 - [ ] Unit test
 - [ ] Deploy script
 - [ ] Refactor
+- [ ] How to create project on firebase
+- [ ] How to create LINE Official account
+- [ ] Preview or Example screen
