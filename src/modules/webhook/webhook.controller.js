@@ -1,10 +1,12 @@
+import HttpStatus from 'http-status-codes';
 import { validateSignature } from '../../utils'
-const HttpStatus = require('http-status-codes');
-const hookService = require('../../services/webhook.service')
+import WebhookService from '../../services/webhook.service';
+
+const webhookService = new WebhookService();
 
 const healthCheck = async (ctx) => {
   try {
-    ctx.status = HttpStatus.StatusCodes.OK;
+    ctx.status = HttpStatus.OK;
     ctx.body = 'OK';
   } catch (e) {
     throw e;
@@ -16,12 +18,12 @@ const hook = async (ctx) => {
     const lineSignature = ctx.header['x-line-signature'];
     const body = ctx.request.body;
     if(!validateSignature(lineSignature, body)) {
-      ctx.status = HttpStatus.StatusCodes.BAD_REQUEST;
+      ctx.status = HttpStatus.BAD_REQUEST;
       ctx.body = 'Bad signature';
       return;
     }
-    await hookService.hookAction(body);
-    ctx.status = HttpStatus.StatusCodes.OK;
+    await webhookService.hookAction(body);
+    ctx.status = HttpStatus.OK;
     ctx.body = 'OK';
   } catch (e) {
     throw e;

@@ -1,8 +1,8 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
+import config from '../config';
 
 export default (headerSignature, body) => {
-  console.log(headerSignature, body)
-  const channelSecret = process.env.CHANNEL_SECRET; // Channel secret string
+  const channelSecret = config.line.channelSecret; // Channel secret string
   const signature = crypto
     .createHmac('SHA256', channelSecret)
     .update(JSON.stringify(body)).digest('base64');
