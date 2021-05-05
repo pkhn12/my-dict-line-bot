@@ -5,7 +5,7 @@ export default class FirebaseService {
   constructor() {
     const {serviceAccount, databaseURL} = config;
     admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(JSON.stringify(serviceAccount))),
+      credential: admin.credential.cert(serviceAccount),
       databaseURL
     });
     this.database = admin.database();
