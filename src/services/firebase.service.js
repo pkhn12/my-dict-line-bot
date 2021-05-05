@@ -1,11 +1,14 @@
-import firebase from 'firebase';
+import admin from 'firebase-admin';
 import config from '../config';
 
 export default class FirebaseService {
   constructor() {
-    const firebaseConfig = config.firebase;
-    firebase.initializeApp(firebaseConfig);
-    this.database = firebase.database();
+    const {serviceAccount, databaseURL} = config;
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(JSON.stringify(serviceAccount))),
+      databaseURL
+    });
+    this.database = admin.database();
     this.dictionary = this.database.ref('dictionary');
       
   }
